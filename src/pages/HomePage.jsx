@@ -607,7 +607,7 @@ export default function ModernHomePage() {
                 </motion.span>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-6">
+              {/* <div className="grid md:grid-cols-3 gap-6">
                 {cities.map((city, index) => (
                   <motion.div
                     key={city}
@@ -617,6 +617,11 @@ export default function ModernHomePage() {
                   >
                     <WeatherCard city={city} />
                   </motion.div>
+                ))}
+              </div> */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full overflow-x-hidden">
+                {cities.map((city) => (
+                  <WeatherCard key={city} city={city} />
                 ))}
               </div>
             </motion.div>

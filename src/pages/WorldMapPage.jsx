@@ -1,382 +1,3 @@
-// import React, { useState } from "react";
-// import { useQuery } from "@tanstack/react-query";
-
-// import {
-//   fetchCurrentWeather,
-//   fetchForecast,
-//   fetchCitySuggestions,
-//   fetchNearbyCities,
-// } from "../services/weatherService";
-// import {
-//   LineChart,
-//   Line,
-//   XAxis,
-//   YAxis,
-//   Tooltip,
-//   ResponsiveContainer,
-// } from "recharts";
-// import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-// import WeatherCard from "../components/weather/WeatherCard";
-// import "leaflet/dist/leaflet.css";
-// import L from "leaflet";
-
-// // Fix default marker icon in React-Leaflet
-// delete L.Icon.Default.prototype._getIconUrl;
-// L.Icon.Default.mergeOptions({
-//   iconRetinaUrl:
-//     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-//   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-//   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-// });
-
-// export default function WorldMapPage({ favourites, handleFavourite }) {
-//   const [city, setCity] = useState("");
-//   const [search, setSearch] = useState("");
-//   const [suggestions, setSuggestions] = useState([]);
-//   const [weatherLayer, setWeatherLayer] = useState("temp"); // temp, wind, pressure
-
-//   // Weather layer configurations for OpenWeatherMap
-//   const weatherLayers = {
-//     temp: {
-//       name: "Temperature",
-//       icon: "🌡️",
-//       url: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${
-//         import.meta.env.VITE_OPENWEATHER_API_KEY
-//       }`,
-//       legend: "Temperature (°C)",
-//     },
-//     wind: {
-//       name: "Wind Speed",
-//       icon: "💨",
-//       url: `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${
-//         import.meta.env.VITE_OPENWEATHER_API_KEY
-//       }`,
-//       legend: "Wind Speed (m/s)",
-//     },
-//     pressure: {
-//       name: "Pressure",
-//       icon: "📊",
-//       url: `https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=${
-//         import.meta.env.VITE_OPENWEATHER_API_KEY
-//       }`,
-//       legend: "Pressure (hPa)",
-//     },
-//   };
-
-//   const handleInput = async (e) => {
-//     const value = e.target.value;
-//     setCity(value);
-
-//     if (value.length >= 2) {
-//       try {
-//         const data = await fetchCitySuggestions(value);
-//         setSuggestions(data);
-//       } catch (err) {
-//         console.error(err);
-//         setSuggestions([]);
-//       }
-//     } else {
-//       setSuggestions([]);
-//     }
-//   };
-
-//   const handleSelect = (s) => {
-//     setSearch(s.name);
-//     setCity(s.name);
-//     setSuggestions([]);
-//   };
-
-//   const handleSearch = (e) => {
-//     e.preventDefault();
-//     setSearch(city);
-//     setSuggestions([]);
-//   };
-
-//   // Fetch main weather + forecast
-//   const { data: weather } = useQuery(
-//     ["weather", search],
-//     () => fetchCurrentWeather(search),
-//     { enabled: !!search }
-//   );
-
-//   const { data: forecast } = useQuery(
-//     ["forecast", search],
-//     () => fetchForecast(search),
-//     { enabled: !!search }
-//   );
-
-//   // Fetch nearby cities
-//   const { data: nearby } = useQuery(
-//     ["nearby", weather?.coord],
-//     async () => {
-//       if (!weather?.coord) return [];
-//       const allNearby = await fetchNearbyCities(
-//         weather.coord.lat,
-//         weather.coord.lon,
-//         7
-//       );
-//       const filtered = allNearby.filter(
-//         (c) => c.name.toLowerCase() !== search.toLowerCase()
-//       );
-//       return filtered.slice(0, 6);
-//     },
-//     { enabled: !!weather?.coord }
-//   );
-
-//   // Custom Weather Layer Toggle Component
-//   const WeatherLayerToggle = () => (
-//     <div className="bg-white dark:bg-slate-800 p-4 rounded shadow mb-4">
-//       <h3 className="text-lg font-semibold mb-3">🗺️ Weather Layers</h3>
-//       <div className="flex flex-col sm:flex-row sm:justify-evenly gap-3">
-//         {Object.entries(weatherLayers).map(([key, layer]) => (
-//           <button
-//             key={key}
-//             onClick={() => setWeatherLayer(key)}
-//             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all w-full sm:w-40 text-center
-//               ${
-//                 weatherLayer === key
-//                   ? "bg-blue-600 text-white shadow-lg"
-//                   : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600"
-//               }`}
-//           >
-//             <span className="text-lg">{layer.icon}</span>
-//             <span>{layer.name}</span>
-//           </button>
-//         ))}
-//       </div>
-
-//       {/* Legend */}
-//       <div className="mt-3 p-2 bg-gray-50 dark:bg-slate-700 rounded text-sm text-center">
-//         <strong>Current Layer:</strong> {weatherLayers[weatherLayer].legend}
-//       </div>
-//     </div>
-//   );
-
-//   // Weather Legend Component
-//   const WeatherLegend = () => {
-//     const legends = {
-//       temp: {
-//         colors: [
-//           { color: "#313695", label: "< -40°C" },
-//           { color: "#4575b4", label: "-40°C to -20°C" },
-//           { color: "#74add1", label: "-20°C to 0°C" },
-//           { color: "#abd9e9", label: "0°C to 10°C" },
-//           { color: "#e0f3f8", label: "10°C to 20°C" },
-//           { color: "#ffffbf", label: "20°C to 30°C" },
-//           { color: "#fee090", label: "30°C to 35°C" },
-//           { color: "#fdae61", label: "35°C to 40°C" },
-//           { color: "#f46d43", label: "40°C to 45°C" },
-//           { color: "#d73027", label: "> 45°C" },
-//         ],
-//       },
-//       wind: {
-//         colors: [
-//           { color: "#e0f7fa", label: "0-2 m/s" },
-//           { color: "#81d4fa", label: "2-4 m/s" },
-//           { color: "#29b6f6", label: "4-6 m/s" },
-//           { color: "#0288d1", label: "6-8 m/s" },
-//           { color: "#01579b", label: "8-12 m/s" },
-//           { color: "#002f6c", label: "12-16 m/s" },
-//           { color: "#000033", label: "> 16 m/s" },
-//         ],
-//       },
-//       pressure: {
-//         colors: [
-//           { color: "#800026", label: "< 980 hPa" },
-//           { color: "#bd0026", label: "980-990 hPa" },
-//           { color: "#e31a1c", label: "990-1000 hPa" },
-//           { color: "#fc4e2a", label: "1000-1010 hPa" },
-//           { color: "#fd8d3c", label: "1010-1020 hPa" },
-//           { color: "#feb24c", label: "1020-1030 hPa" },
-//           { color: "#fed976", label: "> 1030 hPa" },
-//         ],
-//       },
-//     };
-
-//     const currentLegend = legends[weatherLayer];
-
-//     return (
-//       <div className="absolute bottom-4 left-4 bg-white dark:bg-slate-800 p-3 rounded shadow-lg z-[1000] max-w-xs">
-//         <h4 className="font-semibold mb-2 text-sm">
-//           {weatherLayers[weatherLayer].legend}
-//         </h4>
-//         <div className="space-y-1">
-//           {currentLegend.colors.map((item, index) => (
-//             <div key={index} className="flex items-center gap-2 text-xs">
-//               <div
-//                 className="w-4 h-3 rounded border"
-//                 style={{ backgroundColor: item.color }}
-//               ></div>
-//               <span>{item.label}</span>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     );
-//   };
-
-//   return (
-//     <div className="space-y-6 relative">
-//       {/* Search bar */}
-//       <form onSubmit={handleSearch} className="flex flex-col gap-2 relative">
-//         <div className="flex gap-2">
-//           <input
-//             type="text"
-//             placeholder="Enter city name"
-//             value={city}
-//             onChange={handleInput}
-//             className="border p-2 rounded flex-1 dark:bg-slate-700 dark:text-gray-100"
-//           />
-//           <button
-//             type="submit"
-//             className="bg-blue-600 text-white px-4 rounded hover:bg-blue-500"
-//           >
-//             Search
-//           </button>
-//         </div>
-
-//         {/* Suggestions dropdown */}
-//         {suggestions.length > 0 && (
-//           <ul className="absolute top-full left-0 w-full bg-white dark:bg-slate-700 border rounded shadow z-50 max-h-48 overflow-y-auto">
-//             {suggestions.map((s) => (
-//               <li
-//                 key={`${s.lat}-${s.lon}`}
-//                 className="px-3 py-2 hover:bg-blue-100 dark:hover:bg-slate-600 cursor-pointer"
-//                 onClick={() => handleSelect(s)}
-//               >
-//                 {s.name}
-//                 {s.state ? `, ${s.state}` : ""}, {s.country}
-//               </li>
-//             ))}
-//           </ul>
-//         )}
-//       </form>
-
-//       {/* Main WeatherCard + Forecast Graph */}
-//       {weather && forecast && (
-//         <div className="grid md:grid-cols-1 gap-6">
-//           <div className="grid md:grid-cols-2 gap-4 items-start">
-//             {/* WeatherCard */}
-//             <WeatherCard
-//               city={search}
-//               weather={weather}
-//               forecast={forecast}
-//               isFavourite={favourites?.includes(search)}
-//               onFavourite={handleFavourite}
-//             />
-
-//             {/* Temperature Trend Graph */}
-//             <div className="bg-white dark:bg-slate-800 p-4 rounded shadow">
-//               <h2 className="text-lg font-semibold mb-3">
-//                 🌡 Temperature Trend
-//               </h2>
-//               <ResponsiveContainer width="100%" height={200}>
-//                 <LineChart
-//                   data={forecast.list.map((f) => ({
-//                     time: f.dt_txt.slice(5, 16),
-//                     temp: f.main.temp,
-//                   }))}
-//                   margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-//                 >
-//                   <XAxis dataKey="time" tick={{ fontSize: 12 }} />
-//                   <YAxis domain={["auto", "auto"]} tick={{ fontSize: 12 }} />
-//                   <Tooltip />
-//                   <Line
-//                     type="monotone"
-//                     dataKey="temp"
-//                     stroke="#1d4ed8"
-//                     strokeWidth={2}
-//                     dot={{ r: 2 }}
-//                   />
-//                 </LineChart>
-//               </ResponsiveContainer>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-
-//       {/* Weather Layer Toggle */}
-//       {weather && <WeatherLayerToggle />}
-
-//       {/* Advanced Weather Map */}
-//       {weather && (
-//         <div className="h-[600px] w-full rounded overflow-hidden shadow relative">
-//           <MapContainer
-//             center={[weather.coord.lat, weather.coord.lon]}
-//             zoom={5}
-//             minZoom={3}
-//             maxZoom={8}
-//             style={{ height: "100%", width: "100%" }}
-//             key={weatherLayer} // Force re-render when layer changes
-//           >
-//             {/* Dark base map */}
-//             <TileLayer
-//               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-//               attribution='&copy; OpenStreetMap contributors &copy; <a href="https://carto.com/">CARTO</a>'
-//               subdomains="abcd"
-//             />
-
-//             {/* Weather overlay */}
-//             <TileLayer
-//               url={weatherLayers[weatherLayer].url}
-//               opacity={0.8}
-//               attribution='Weather data &copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>'
-//             />
-
-//             {/* Main city marker */}
-//             <Marker position={[weather.coord.lat, weather.coord.lon]}>
-//               <Popup>
-//                 <div className="text-center">
-//                   <strong>{weather.name}</strong> <br />
-//                   🌡️ {Math.round(weather.main.temp)}°C <br />
-//                   💨 {weather.wind?.speed || 0} m/s <br />
-//                   💧 {weather.main.humidity}% <br />
-//                   📊 {weather.main.pressure} hPa
-//                 </div>
-//               </Popup>
-//             </Marker>
-//           </MapContainer>
-
-//           {/* Weather Legend */}
-//           <WeatherLegend />
-
-//           {/* Map Info Panel */}
-//           <div className="absolute top-4 right-4 bg-white dark:bg-slate-800 p-3 rounded shadow-lg z-[1000]">
-//             <div className="text-sm">
-//               <strong>Current Layer:</strong> {weatherLayers[weatherLayer].icon}{" "}
-//               {weatherLayers[weatherLayer].name}
-//             </div>
-//             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-//               Zoom out to see weather patterns better
-//             </div>
-//             <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-//               Best visibility at zoom levels 3-6
-//             </div>
-//           </div>
-//         </div>
-//       )}
-
-//       {/* Nearby cities */}
-//       {nearby?.length > 0 && (
-//         <div className="space-y-4">
-//           <h2 className="text-2xl font-semibold">🌍 Nearby Cities</h2>
-//           <div className="grid md:grid-cols-3 gap-6">
-//             {nearby
-//               .filter((c) => c.name.toLowerCase() !== search.toLowerCase())
-//               .map((c) => (
-//                 <WeatherCard
-//                   key={c.id}
-//                   city={c.name}
-//                   isFavourite={favourites?.includes(c.name)}
-//                   onFavourite={handleFavourite}
-//                 />
-//               ))}
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -548,7 +169,7 @@ export default function WorldMapPage({ favourites, handleFavourite }) {
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="absolute bottom-4 left-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md p-4 rounded-2xl shadow-2xl z-[1000] max-w-xs border border-gray-200 dark:border-gray-700"
+        className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md p-2 sm:p-3 md:p-4 rounded-xl shadow-2xl z-[1000] w-[140px] sm:w-[180px] md:w-[220px] border border-gray-200 dark:border-gray-700 text-[10px] sm:text-xs md:text-sm"
       >
         <h4 className="font-bold mb-3 text-sm text-gray-900 dark:text-white flex items-center gap-2">
           <span className="text-lg">{weatherLayers[weatherLayer].icon}</span>
@@ -677,7 +298,7 @@ export default function WorldMapPage({ favourites, handleFavourite }) {
             className="space-y-8"
           >
             {/* Weather Overview Cards */}
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
               {/* WeatherCard */}
               <motion.div
                 whileHover={{ y: -5 }}
@@ -701,7 +322,10 @@ export default function WorldMapPage({ favourites, handleFavourite }) {
                 <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
                   <span className="text-2xl">📈</span> Temperature Trend
                 </h2>
-                <ResponsiveContainer width="100%" height={220}>
+                <ResponsiveContainer
+                  width="100%"
+                  height={window.innerWidth < 640 ? 180 : 250}
+                >
                   <LineChart
                     data={forecast.list.slice(0, 8).map((f) => ({
                       time: f.dt_txt.slice(11, 16),
@@ -721,12 +345,35 @@ export default function WorldMapPage({ favourites, handleFavourite }) {
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        backgroundColor:
+                          document.documentElement.classList.contains("dark")
+                            ? "rgba(31, 41, 55, 0.95)" // dark gray for dark mode
+                            : "rgba(255, 255, 255, 0.95)",
+                        color: document.documentElement.classList.contains(
+                          "dark"
+                        )
+                          ? "#F9FAFB" // light text in dark mode
+                          : "#111827", // dark text in light mode
                         border: "none",
                         borderRadius: "12px",
                         boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                       }}
+                      itemStyle={{
+                        color: document.documentElement.classList.contains(
+                          "dark"
+                        )
+                          ? "#E5E7EB"
+                          : "#374151",
+                      }}
+                      labelStyle={{
+                        color: document.documentElement.classList.contains(
+                          "dark"
+                        )
+                          ? "#F3F4F6"
+                          : "#111827",
+                      }}
                     />
+
                     <Line
                       type="monotone"
                       dataKey="temp"
@@ -857,7 +504,7 @@ export default function WorldMapPage({ favourites, handleFavourite }) {
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="absolute top-4 right-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md p-4 rounded-2xl shadow-2xl z-[1000] border border-gray-200 dark:border-gray-700"
+                  className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md p-2 sm:p-3 md:p-4 rounded-xl shadow-2xl z-[1000] border border-gray-200 dark:border-gray-700 text-[10px] sm:text-xs md:text-sm w-[140px] sm:w-[180px] md:w-[220px]"
                 >
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">
@@ -905,7 +552,7 @@ export default function WorldMapPage({ favourites, handleFavourite }) {
                   🧭
                 </motion.span>
               </div>
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
                 {nearby.map((c, index) => (
                   <motion.div
                     key={c.id}

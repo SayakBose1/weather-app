@@ -22,10 +22,16 @@ export default function WeatherCard({ city }) {
 
   if (!city) return null;
   if (isLoading)
-    return <div className="p-6 bg-white rounded shadow">Loading...</div>;
+    return (
+      <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow w-full max-w-sm mx-auto text-center">
+        Loading...
+      </div>
+    );
   if (error)
     return (
-      <div className="p-6 bg-red-50 rounded shadow">Error loading weather</div>
+      <div className="p-6 bg-red-50 dark:bg-slate-800 rounded-2xl shadow w-full max-w-sm mx-auto text-center">
+        Error loading weather
+      </div>
     );
 
   const icon = data.weather?.[0]?.icon;
@@ -36,21 +42,21 @@ export default function WeatherCard({ city }) {
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="p-6 bg-white dark:bg-slate-800 rounded shadow space-y-4 overflow-hidden"
+      className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow space-y-4 w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto overflow-hidden"
     >
-      {/* Top Row: City + Description + Stats + Icon + Favorite */}
-      <div className="flex justify-between items-start">
+      {/* 🟢 Top Row: City + Description + Stats + Icon + Favorite */}
+      <div className="flex justify-between items-start flex-wrap gap-2">
         <div>
           <h2 className="text-lg font-semibold">{data.name}</h2>
           <p className="text-sm opacity-70 capitalize">{description}</p>
-          <div className="flex gap-4 text-sm mt-2">
+          <div className="flex flex-wrap gap-3 text-sm mt-2">
             <p>Humidity: {data.main.humidity}%</p>
             <p>Pressure: {data.main.pressure} hPa</p>
             <p>Wind: {data.wind.speed} m/s</p>
           </div>
         </div>
 
-        {/* Icon + Favorite Button stacked vertically */}
+        {/* Icon + Favorite Button */}
         <div className="flex flex-col items-center gap-2 flex-shrink-0">
           {icon && (
             <img
@@ -63,7 +69,7 @@ export default function WeatherCard({ city }) {
         </div>
       </div>
 
-      {/* Middle Row: Main Temp + Feels Like */}
+      {/* 🟢 Middle Row: Main Temp + Feels Like */}
       <div>
         <p className="text-3xl font-bold">{Math.round(data.main.temp)}°C</p>
         <p className="text-sm opacity-70">
@@ -71,9 +77,9 @@ export default function WeatherCard({ city }) {
         </p>
       </div>
 
-      {/* Bottom Row: Mini Forecast */}
+      {/* 🟢 Bottom Row: Mini Forecast */}
       {forecast?.list && (
-        <div className="flex gap-2 overflow-x-auto py-1">
+        <div className="flex gap-2 overflow-x-auto py-1 w-full scrollbar-hide">
           {forecast.list.slice(0, 6).map((f, index) => (
             <div
               key={index}

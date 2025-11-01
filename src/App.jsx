@@ -10,15 +10,21 @@ export default function App() {
   const [currentSection, setCurrentSection] = useState("home");
 
   return (
-    <div className={dark ? "dark bg-slate-900 text-white min-h-screen" : "bg-white text-black min-h-screen"}>
-      <Navbar 
-        dark={dark} 
-        setDark={setDark} 
-        currentSection={currentSection} 
-        setCurrentSection={setCurrentSection} 
+    <div
+      className={
+        dark
+          ? "dark bg-slate-900 text-white min-h-screen w-full overflow-x-hidden"
+          : "bg-white text-black min-h-screen w-full overflow-x-hidden"
+      }
+    >
+      <Navbar
+        dark={dark}
+        setDark={setDark}
+        currentSection={currentSection}
+        setCurrentSection={setCurrentSection}
       />
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="w-full px-4 py-6 overflow-x-hidden">
         {currentSection === "home" && <HomePage />}
         {currentSection === "worldmap" && <WorldMapPage />}
         {currentSection === "favorites" && <FavoritesPage />}
