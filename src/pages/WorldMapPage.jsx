@@ -315,93 +315,160 @@ export default function WorldMapPage({ favourites, handleFavourite }) {
 
               {/* Temperature Trend Graph */}
               <motion.div
-                whileHover={{ y: -5 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50"
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.5, type: "spring", stiffness: 300 }}
+                whileHover={{
+                  y: -2,
+                  scale: 1.01,
+                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                  transition: { duration: 0.3 },
+                }}
+                className="h-full flex flex-col bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden"
               >
-                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                  <span className="text-2xl">📈</span> Temperature Trend
-                </h2>
-                <ResponsiveContainer
-                  width="100%"
-                  height={window.innerWidth < 640 ? 180 : 250}
-                >
-                  <LineChart
-                    data={forecast.list.slice(0, 8).map((f) => ({
-                      time: f.dt_txt.slice(11, 16),
-                      temp: Math.round(f.main.temp),
-                    }))}
-                    margin={{ top: 5, right: 10, bottom: 5, left: -20 }}
-                  >
-                    <XAxis
-                      dataKey="time"
-                      tick={{ fontSize: 12, fill: "#6B7280" }}
-                      stroke="#9CA3AF"
-                    />
-                    <YAxis
-                      domain={["auto", "auto"]}
-                      tick={{ fontSize: 12, fill: "#6B7280" }}
-                      stroke="#9CA3AF"
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor:
-                          document.documentElement.classList.contains("dark")
-                            ? "rgba(31, 41, 55, 0.95)" // dark gray for dark mode
-                            : "rgba(255, 255, 255, 0.95)",
-                        color: document.documentElement.classList.contains(
-                          "dark"
-                        )
-                          ? "#F9FAFB" // light text in dark mode
-                          : "#111827", // dark text in light mode
-                        border: "none",
-                        borderRadius: "12px",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                      }}
-                      itemStyle={{
-                        color: document.documentElement.classList.contains(
-                          "dark"
-                        )
-                          ? "#E5E7EB"
-                          : "#374151",
-                      }}
-                      labelStyle={{
-                        color: document.documentElement.classList.contains(
-                          "dark"
-                        )
-                          ? "#F3F4F6"
-                          : "#111827",
-                      }}
-                    />
+                {/* Header */}
+                <div className="relative bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4">
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-40 h-40 bg-white rounded-full blur-3xl"></div>
+                  </div>
 
-                    <Line
-                      type="monotone"
-                      dataKey="temp"
-                      stroke="url(#colorGradient)"
-                      strokeWidth={3}
-                      dot={{
-                        r: 4,
-                        fill: "#3B82F6",
-                        strokeWidth: 2,
-                        stroke: "#fff",
-                      }}
-                      activeDot={{ r: 6 }}
-                    />
-                    <defs>
-                      <linearGradient
-                        id="colorGradient"
-                        x1="0"
-                        y1="0"
-                        x2="1"
-                        y2="0"
-                      >
-                        <stop offset="0%" stopColor="#3B82F6" />
-                        <stop offset="50%" stopColor="#8B5CF6" />
-                        <stop offset="100%" stopColor="#EC4899" />
-                      </linearGradient>
-                    </defs>
-                  </LineChart>
-                </ResponsiveContainer>
+                  <div className="relative z-10">
+                    <h2 className="text-xl font-black text-white flex items-center gap-2 mb-1">
+                      <span className="text-2xl">📈</span> Temperature Trend
+                    </h2>
+                    <p className="text-xs text-white/80 font-medium">
+                      Next 24 hours forecast
+                    </p>
+                  </div>
+                </div>
+
+                {/* Chart Area */}
+                <div className="flex-1 p-4 pb-2">
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart
+                      data={forecast.list.slice(0, 8).map((f) => ({
+                        time: f.dt_txt.slice(11, 16),
+                        temp: Math.round(f.main.temp),
+                      }))}
+                      margin={{ top: 5, right: 10, bottom: 5, left: -20 }}
+                    >
+                      <XAxis
+                        dataKey="time"
+                        tick={{ fontSize: 11, fill: "#6B7280" }}
+                        stroke="#9CA3AF"
+                        tickLine={false}
+                      />
+                      <YAxis
+                        domain={["dataMin - 2", "dataMax + 2"]}
+                        tick={{ fontSize: 11, fill: "#6B7280" }}
+                        stroke="#9CA3AF"
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "rgba(255, 255, 255, 0.98)",
+                          border: "none",
+                          borderRadius: "12px",
+                          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2)",
+                          padding: "8px 12px",
+                        }}
+                        itemStyle={{
+                          color: "#111",
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                        }}
+                        labelStyle={{
+                          color: "#555",
+                          fontWeight: "600",
+                          fontSize: "12px",
+                          marginBottom: "4px",
+                        }}
+                        formatter={(value) => [`${value}°C`, "Temperature"]}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="temp"
+                        stroke="url(#colorGradient)"
+                        strokeWidth={3}
+                        dot={{
+                          r: 4,
+                          fill: "#3B82F6",
+                          strokeWidth: 2,
+                          stroke: "#fff",
+                        }}
+                        activeDot={{
+                          r: 7,
+                          fill: "#EC4899",
+                          strokeWidth: 3,
+                          stroke: "#fff",
+                        }}
+                      />
+                      <defs>
+                        <linearGradient
+                          id="colorGradient"
+                          x1="0"
+                          y1="0"
+                          x2="1"
+                          y2="0"
+                        >
+                          <stop offset="0%" stopColor="#3B82F6" />
+                          <stop offset="50%" stopColor="#8B5CF6" />
+                          <stop offset="100%" stopColor="#EC4899" />
+                        </linearGradient>
+                      </defs>
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Stats Bar */}
+                <div className="px-4 pb-4">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-2 text-center border border-orange-100 dark:border-orange-800/30">
+                      <div className="text-xl mb-0.5">🔥</div>
+                      <p className="text-[10px] text-gray-600 dark:text-gray-400 font-medium">
+                        High
+                      </p>
+                      <p className="text-base font-black bg-gradient-to-br from-orange-600 to-red-600 dark:from-orange-400 dark:to-red-400 bg-clip-text text-transparent">
+                        {Math.max(
+                          ...forecast.list.slice(0, 8).map((f) => f.main.temp)
+                        )}
+                        °
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-2 text-center border border-purple-100 dark:border-purple-800/30">
+                      <div className="text-xl mb-0.5">📊</div>
+                      <p className="text-[10px] text-gray-600 dark:text-gray-400 font-medium">
+                        Average
+                      </p>
+                      <p className="text-base font-black bg-gradient-to-br from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                        {Math.round(
+                          forecast.list
+                            .slice(0, 8)
+                            .reduce((a, f) => a + f.main.temp, 0) / 8
+                        )}
+                        °
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-2 text-center border border-blue-100 dark:border-blue-800/30">
+                      <div className="text-xl mb-0.5">❄️</div>
+                      <p className="text-[10px] text-gray-600 dark:text-gray-400 font-medium">
+                        Low
+                      </p>
+                      <p className="text-base font-black bg-gradient-to-br from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
+                        {Math.min(
+                          ...forecast.list.slice(0, 8).map((f) => f.main.temp)
+                        )}
+                        °
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Accent Line */}
+                <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
               </motion.div>
             </div>
 
