@@ -23,13 +23,13 @@ export default function WeatherCard({ city }) {
   if (!city) return null;
   if (isLoading)
     return (
-      <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow w-full max-w-sm mx-auto text-center">
+      <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow w-full max-w-sm mx-auto text-center border border-gray-200 dark:border-transparent">
         Loading...
       </div>
     );
   if (error)
     return (
-      <div className="p-6 bg-red-50 dark:bg-slate-800 rounded-2xl shadow w-full max-w-sm mx-auto text-center">
+      <div className="p-6 bg-red-50 dark:bg-slate-800 rounded-2xl shadow w-full max-w-sm mx-auto text-center border border-red-200 dark:border-transparent">
         Error loading weather
       </div>
     );
@@ -42,7 +42,7 @@ export default function WeatherCard({ city }) {
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow space-y-4 w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto overflow-hidden"
+      className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow space-y-4 w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto overflow-hidden border border-gray-200 dark:border-slate-700/60"
     >
       {/* 🟢 Top Row: City + Description + Stats + Icon + Favorite */}
       <div className="flex justify-between items-start flex-wrap gap-2">
